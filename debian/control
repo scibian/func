@@ -1,0 +1,16 @@
+Source: func
+Section: admin
+Priority: extra
+Maintainer: Gregoire Menuel <gregoire-externe.menuel@edf.fr>
+Build-Depends: debhelper (>= 8.0.0),
+               python-all-dev (>= 2.6.6-3~)
+Standards-Version: 3.9.3
+Homepage: https://fedorahosted.org/func/
+
+Package: func
+Architecture: any
+Depends: ${python:Depends}, ${misc:Depends},
+         certmaster (>= 0.28),
+         python-openssl
+Description: Fedora Unified Network Controller
+ Func allows for running commands on remote systems in a secure way, like SSH, but offers several improvements.

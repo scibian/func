@@ -1,0 +1,65 @@
+Index: func-0.28/docs/func-create-module.pod
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ func-0.28/docs/func-create-module.pod	2013-05-07 11:51:25.000000000 +0200
+@@ -0,0 +1,60 @@
++=head1 NAME
++
++func-create-module -- Func helper utility for authoring new Func modules
++
++=head1 SYNOPSIS
++
++func-create-module
++
++=head1 DESCRIPTION
++
++This  manual  page documents the statsvn command.  This manual page was
++written for the Debian distribution because the original  program  does
++not have a manual page.
++
++"func-create-module" takes not parameters.  When executed, it will
++interactivelty ask the user for information pertaining to their proposed func
++module.
++
++Once complete, a file will be written in the current working directory, named
++based on user-input.
++
++=head1 EXAMPLE
++
++cyrus:~$ func-create-module
++Module Name: Vegetator
++Description: Converts human brains into dead vegatation with a simple jab.
++Author: Walter Freeman
++Email: wfreeman superhumanity org
++
++Leave blank to finish.
++Method: convincePatientOfTerribleMentalDisorder
++Method: liePatientDown
++Method: pushChiselThroughEyes
++Method: driveChiselThroughBrainWithHammer
++Method: stir
++Method: pullChiselOut
++Method: collectMoney
++Method: run
++Method:
++Your module is ready to be hacked on. Wrote out to vegetator.py.
++
++Example: func "*" call --json service inventory
++
++=head1 ADDITONAL RESOURCES
++
++See https://hosted.fedoraproject.org/projects/func/ for more information,
++including information on scripting func from Python.
++
++See also the manpages for "func-inventory", "funcd", "certmaster",
++"certmaster-ca", and "func-transmit".
++
++=head1 SEE ALSO
++
++func-build-map(1), func-transmit(1), func-inventory(1), func(1), funcd(1).
++
++=head1 AUTHORS
++
++This manual page was adapted by Nima Talebi <nima it net au> from the one for
++func-create-module(1) written by the various authors (see below) It was written
++for the Debian project, but  may  be used by others.

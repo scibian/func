@@ -1,0 +1,30 @@
+func (0.28-3.1+c9+1) calibre9; urgency=medium
+
+  * Import into Calibre9.
+
+ -- Yann Soubeyrand <yann-externe.soubeyrand@edf.fr>  Thu, 02 Jun 2016 10:05:15 +0200
+
+func (0.28-3.1) calibre8; urgency=low
+
+  * Import into Calibre 8.
+
+ -- Ana Guerrero <ana-externe.guerrero@edf.fr>  Fri, 08 Nov 2013 14:50:01 +0100
+
+func (0.28-3) calibre7; urgency=low
+
+  * Correction du init.d pour ne pas retourner d'erreur si le processus
+    n'existe pas lors du stop (Closes: #1315)
+
+ -- Gregoire Menuel <gregoire-externe.menuel@edf.fr>  Mon, 19 Aug 2013 10:00:26 +0200
+
+func (0.28-2) calibre7; urgency=low
+
+  * Correction du script d'init.d 
+
+ -- Gregoire Menuel <gregoire-externe.menuel@edf.fr>  Tue, 02 Jul 2013 14:38:06 +0200
+
+func (0.28-1) calibre7; urgency=low
+
+  * Initial release (Closes: #1212)
+
+ -- Gregoire Menuel <gregoire-externe.menuel@edf.fr>  Mon, 06 May 2013 17:38:28 +0200

@@ -1,0 +1,27 @@
+Index: func-0.28/init-scripts/funcd
+===================================================================
+--- func-0.28.orig/init-scripts/funcd	2013-07-02 17:33:37.638881180 +0200
++++ func-0.28/init-scripts/funcd	2013-08-19 10:00:23.026049954 +0200
+@@ -7,10 +7,10 @@
+ 
+ ### BEGIN INIT INFO
+ # Provides: funcd
+-# Required-Start: network
++# Required-Start: networking
+ # Required-Stop:
+-# Default-Start: 3 4 5
+-# Default-Stop: 0 1 2 6
++# Default-Start: 2 3 4 5
++# Default-Stop: 0 1 6
+ # Short-Description: Fedora Unified Network Control
+ # Description: Crazy simple, secure remote management.
+ ### END INIT INFO
+@@ -86,7 +86,7 @@
+ stop() {
+     if [ -f /etc/debian_version ]; then
+ 	log_daemon_msg "Stopping func daemon" "funcd"
+-        start-stop-daemon --stop --quiet --pidfile /var/run/funcd.pid --name funcd
++        start-stop-daemon --stop --quiet --oknodo --pidfile /var/run/funcd.pid --name funcd
+ 	RETVAL=$?
+         log_end_msg $RETVAL
+ 	rm -f /var/run/funcd.pid
