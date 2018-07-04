@@ -1,0 +1,223 @@
+##
+## Copyright 2007, Red Hat, Inc
+## see AUTHORS
+##
+## This software may be freely redistributed under the terms of the GNU
+## general public license.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software
+## Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+##
+
+import inspect
+import os
+from func import logger
+from certmaster.config import read_config, BaseConfig
+from func.commonconfig import FuncdConfig
+from func.utils import is_public_valid_method
+from func.minion.func_arg import * #the arg getter stuff
+from types import FunctionType
+from func.logger import LogFactory
+from func import utils
+
+
+def log_all(fn):
+    """
+    That decorator will set a logger to a method
+    which will be associated with its job_id so
+    will log only during when it is running,cool:)
+    """
+    def wrapper(*args):
+
+        if utils.should_log(args):
+            logger = LogFactory.get_instance(app_name=args[len(args)-1]['job_id'])
+
+            #remove job_id from it
+            args = list(args)
+            args.pop()
+        else:#it seems it is not a async call so will use direct logger
+            logger = LogFactory.get_instance()
+
+        setattr(wrapper,"logger",logger)
+        return fn(*args)
+
+    #a hack for get_arg_methods
+    wrapper.overriden_args = inspect.getargspec(fn)
+    try:
+        wrapper.__name__ = fn.__name__
+    except:
+        wrapper._name_ = fn.__name__
+    return wrapper
+
+
+class DecorateLogMeta(type):
+    """
+    A metaclass which simply wrapps all of the public
+    methods in a minion module class,the main purpose
+    is without breaking api adding logging capabilites
+    to methods ...
+    """
+    def __new__(meta, classname, bases, classDict):
+        newClassDict = {}
+        for attributeName, attribute in classDict.items():
+            if type(attribute) == FunctionType and not attributeName.startswith("_"):
+                attribute = log_all(attribute)
+            newClassDict[attributeName] = attribute
+
+        return type.__new__(meta, classname, bases, newClassDict)
+
+
+
+class FuncModule(object):
+
+    __metaclass__ = DecorateLogMeta
+    # the version is meant to
+    version = "0.0.0"
+    api_version = "0.0.0"
+    description = "No Description provided"
+
+    class Config(BaseConfig):
+        pass
+
+    def __init__(self):
+
+        config_file = '/etc/func/minion.conf'
+        self.config = read_config(config_file, FuncdConfig)
+        self.__init_log()
+        self.__base_methods = {
+            # __'s so we don't clobber useful names
+            "module_version" : self.__module_version,
+            "module_api_version" : self.__module_api_version,
+            "module_description" : self.__module_description,
+            "list_methods"       : self.__list_methods,
+            "grep"               : self.grep,
+            "get_method_args"    : self.__get_method_args,
+        }
+        self.__init_options()
+
+    def __init_log(self):
+        log = logger.Logger()
+        self.logger = log.logger
+
+    def __init_options(self):
+        self.options_file = '/etc/func/modules/'+self.__class__.__name__+'.conf'
+        self.options = read_config(self.options_file, self.Config)
+        return
+
+    def save_config(self):
+        fh = open(self.options_file, 'w')
+        self.options.write(fh)
+        return True
+
+    def config_items(self):
+        l = []
+        for i in self.options.iteritems():
+            l.append(i)
+        return l
+
+    def register_rpc(self, handlers, module_name):
+        # add the internal methods, note that this means they
+        # can get clobbbered by subclass versions
+        for meth in self.__base_methods:
+            handlers["%s.%s" % (module_name, meth)] = self.__base_methods[meth]
+
+        # register our module's handlers
+        for name, handler in self.__list_handlers().items():
+            handlers["%s.%s" % (module_name, name)] = handler
+
+    def __list_handlers(self):
+        """ Return a dict of { handler_name, method, ... }.
+        All methods that do not being with an underscore will be exposed.
+        We also make sure to not expose our register_rpc method.
+        """
+        handlers = {}
+        for attr in dir(self):
+            if self.__is_public_valid_method(attr):
+                handlers[attr] = getattr(self, attr)
+        return handlers
+
+    def __list_methods(self):
+        return self.__list_handlers().keys() + self.__base_methods.keys()
+
+    def __module_version(self):
+        return self.version
+
+    def __module_api_version(self):
+        return self.api_version
+
+    def __module_description(self):
+        return self.description
+
+    def __is_public_valid_method(self,attr):
+        return is_public_valid_method(self, attr, blacklist=['register_rpc', 'register_method_args'])
+
+    def __get_method_args(self):
+        """
+        Gets arguments with their formats according to ArgCompatibility
+        class' rules.
+
+        @return : dict with args or Raise Exception if something wrong
+        happens
+        """
+        tmp_arg_dict = self.register_method_args()
+
+        #if it is not implemeted then return empty stuff
+        if not tmp_arg_dict:
+            return {}
+
+        #see if user tried to register an not implemented method :)
+        for method in tmp_arg_dict.iterkeys():
+            if not hasattr(self,method):
+                raise NonExistingMethodRegistered("%s is not in %s "%(method,self.__class__.__name__))
+
+        #create argument validation instance
+        self.arg_comp = ArgCompatibility(tmp_arg_dict)
+        #see if all registered arguments are there
+        for method in tmp_arg_dict.iterkeys():
+            self.arg_comp.is_all_arguments_registered(self,method,tmp_arg_dict[method]['args'])
+        #see if the options that were used are OK..
+        self.arg_comp.validate_all()
+
+        return tmp_arg_dict
+
+    def register_method_args(self):
+        """
+        That is the method where users should override in their
+        modules according to be able to send their method arguments
+        to the Overlord. If they dont have it nothing breaks
+        just that one in the base class is called
+
+        @return : empty {}
+        """
+
+        # to know they didnt implement it
+        return {}
+
+    def grep(self,word):
+        """
+        An useful utility for searching a specified
+        word in a bunch of methods the module specifies
+        @param word : Word to be searched in method calls
+        """
+        return {}
+
+
+def findout(fn):
+    """
+    A simple decorator to send some more structured info
+    to overlord instead every module does that in their
+    find modules ...
+    """
+    def _fn_arg(*args):
+        word = args[1].strip().lower()
+        find_result = fn(args[0],word)
+        structured_result = {}
+        if find_result:
+            for k,v in find_result.iteritems():
+                if find_result[k]:
+                    structured_result["".join([k.im_class.__module__,".",k.__name__])] = v
+            return structured_result
+        return {}
+
+    return _fn_arg

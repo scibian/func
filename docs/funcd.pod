@@ -1,0 +1,75 @@
+=head1 NAME
+
+B<funcd> - deaemon for the Fedora Universal Network Controller
+
+=head1 SYNOPSIS
+
+=over
+
+=item funcd [--daemon]
+
+=item funcd --list-modules
+
+=back
+
+=head1 DESCRIPTION
+
+funcd registers itself to a certificate server (certmaster) listed in /etc/certmaster/minion.conf and takes orders from the command line func when that program is run from that certificate server.
+
+Modules and capabilities provided by funcd are specified at https://fedorahosted.org/func/ 
+
+=head1 OPTIONS
+
+=over 16
+
+=item B<--daemon>		daemonize the server on startup
+
+=item B<--list-modules>	list modules that would be loaded and exit
+
+=back
+
+=head1 CONFIGURATION
+
+See /etc/certmaster/minion.conf for other configuration options.
+
+=head1 ACCESS CONTROLS
+
+By default the certmaster host will always have full access to run all modules on minions, currently this behavior can be disabled by tweaking commonconfig.py.
+
+Additional ACLs can be used to let other (SSL authenticated) hosts access to specific modules. Access control files take one acl per row with the format:
+
+<common_name>-<certificate_hash> = method[, method]...
+
+where common_name is the CN from the host certificate and certificate_hash is its hash as obtained from
+
+openssl x509 -noout -in <certificate_file> -hash
+
+See https://fedorahosted.org/func/wiki/FuncSecurity for additional details.
+
+=head1 FILES
+
+=over
+
+=item B</etc/certmaster/minion.conf>	certmaster config for this minion
+
+=item B</etc/func/minion.conf>		minion configuration
+
+=item B</etc/func/async_methods.conf>	configuration for async methods
+
+=item B</etc/func/minion-acl.d/>		directory for ACL files
+
+=back
+
+=head1 ADDITONAL RESOURCES
+
+See the project wiki at https://fedorahosted.org/func/
+
+=head1 SEE ALSO
+
+C<func(1)>, C<certmaster(1)>, C<certmaster-ca(1)>, C<func-transmit(1)>
+
+=head1 AUTHOR
+
+Various, see https://fedorahosted.org/func/
+
+

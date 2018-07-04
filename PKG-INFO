@@ -1,0 +1,12 @@
+Metadata-Version: 1.0
+Name: func
+Version: 0.28
+Summary: func remote configuration and management api
+Home-page: https://fedorahosted.org/func/
+Author: Lots
+Author-email: func-list@redhat.com
+License: GPL
+Description: 
+        A small pluggable xml-rpc daemon used by func to implement various web services hooks
+        
+Platform: UNKNOWN
